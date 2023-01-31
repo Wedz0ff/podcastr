@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter&family=Lexend:wght@500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media (max-width: 1000px) {
+  html {
+    font-size: 93.75%;
+  }
+}
+@layer components {
+  .allEpisodes {
+    @apply pb-8;
+  }
+  .allEpisodes table {
+    @apply w-full;
+  }
+  .allEpisodes table th,
+  .allEpisodes table td {
+    @apply border-b-rocketGray-100 px-4 py-3 border-b border-solid;
+  }
+  .allEpisodes table th {
+    @apply text-rocketGray-200 uppercase text-left font-heading;
+  }
+  .allEpisodes table td {
+    @apply text-sm;
+  }
+  .allEpisodes table td img {
+    @apply w-10 h-10 rounded-lg;
+  }
+  .allEpisodes table td a {
+    @apply text-rocketGray-800 font-semibold no-underline leading-[1.4rem] text-base hover:underline font-heading;
+  }
+  .allEpisodes table td button {
+    @apply w-8 h-8 border border-rocketGray-100 text-[0] transition-[filter] duration-[0.2s] rounded-lg border-solid hover:brightness-95 bg-white;
+  }
+  .allEpisodes table td button img {
+    @apply w-5 h-5;
+  }
+}
