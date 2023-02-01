@@ -1,18 +1,31 @@
-import { convertDurationToTimeString } from '@/utils/convertDurationToTimeString';
+/* eslint-disable @next/next/no-img-element */
+import { PlayerContext } from '@/contexts/PlayerContext';
+import GetEpisodesData from '@/services/parse-podcast-data';
+import { convertTitleToId } from '@/utils/convertTitleToId';
+import dayjs from 'dayjs';
 import { GetStaticProps } from 'next';
+import Head from 'next/head';
 import Image from 'next/image';
+
 import Link from 'next/link';
-import { api } from '../services/api';
+import { useContext } from 'react';
 
 type Episode = {
-  file: any;
+  itunes_image: any;
+  itunes_author: string;
+  itunes_duration: string;
+  enclosures: any;
   id: string;
   title: string;
   members: string;
-  published_at: string;
+  published: string;
   thumbnail: string;
   publishedAt: string;
   convertedDuration: string;
+  duration: number;
+  url: string;
+  description: string;
+  href: string;
 };
 
 type HomeProps = {
@@ -21,13 +34,37 @@ type HomeProps = {
 };
 
 export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
+  const { playList } = useContext(PlayerContext);
+
+  const episodeList = [...latestEpisodes, ...allEpisodes];
+
   return (
-    <div className="h-[calc(100vh_-_6.5rem)] overflow-y-scroll px-16 py-0">
+    <div className="h-[calc(100vh_-_8rem)] overflow-y-scroll px-16 py-0 ">
+      <Head>
+        <title>Home | À Deriva</title>
+      </Head>
+
+      <section className="items-center text-center">
+        <h2 className="mt-12 mb-6 font-bold font-sans">⚠️ Atenção ⚠️</h2>
+        <p>
+          Este projeto foi feito com fins educacionais, apoie o À Deriva
+          assinando a{' '}
+          <a
+            className="font-semibold hover:text-rocketGray-500"
+            href="https://www.sacocheio.tv"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Saco Cheio TV.
+          </a>
+        </p>
+      </section>
+
       <section className="latest episodes">
-        <h2 className="mt-12 mb-6 font-bold font-sans">Latest episodes</h2>
+        <h2 className="mt-12 mb-6 font-bold font-sans">Últimas entrevistas</h2>
 
         <ul className="grid grid-cols-[repeat(2,1fr)] gap-6">
-          {latestEpisodes.map((episode: Episode) => {
+          {latestEpisodes.map((episode, index) => {
             return (
               <li
                 className="border border-rocketGray-100 relative flex items-center p-5 rounded-3xl border-solid"
@@ -50,7 +87,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                     {episode.title}
                   </Link>
                   <p className="text-sm mt-2 max-w-[70%] whitespace-nowrap overflow-hidden text-ellipsis">
-                    {episode.members}
+                    {episode.description}
                   </p>
                   <span className="inline-block mt-2 text-sm">
                     {episode.publishedAt}
@@ -68,6 +105,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                     className="w-8 h-8 mx-auto hover:brightness-95"
                     src="/play-green.svg"
                     alt="Play"
+                    onClick={() => playList(episodeList, index)}
                   />
                 </button>
               </li>
@@ -77,20 +115,20 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
       </section>
 
       <section className="allEpisodes">
-        <h2 className="mt-12 mb-6 font-bold font-sans">All episodes</h2>
+        <h2 className="mt-12 mb-6 font-bold font-sans">Todas as entrevistas</h2>
         <table cellSpacing={0}>
           <thead>
             <tr>
               <th></th>
-              <th>Podcast</th>
-              <th>Integrantes</th>
-              <th>Duração</th>
+              <th>Convidado</th>
+              <th>Host</th>
+              <th>Data</th>
               <th></th>
             </tr>
           </thead>
 
           <tbody>
-            {allEpisodes.map((episode) => (
+            {allEpisodes.map((episode, index) => (
               <tr key={episode.id}>
                 <td style={{ width: 72 }}>
                   <Image
@@ -106,10 +144,17 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                 </td>
                 <td>{episode.members}</td>
                 <td style={{ width: 100 }}>{episode.publishedAt}</td>
-                <td>{episode.convertedDuration}</td>
+                <td className="text-center">{episode.convertedDuration}</td>
                 <td>
                   <button type="button">
-                    <img className="mx-auto" src="/play-green.svg" alt="Play" />
+                    <img
+                      className="mx-auto"
+                      src="/play-green.svg"
+                      alt="Play"
+                      onClick={() =>
+                        playList(episodeList, index + latestEpisodes.length)
+                      }
+                    />
                   </button>
                 </td>
               </tr>
@@ -122,24 +167,19 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const { data } = await api('episodes', {
-    params: {
-      _limit: 12,
-    },
-  });
+  const data = await GetEpisodesData();
 
   const episodes = data.map((episode: Episode) => {
     return {
-      id: episode.id,
+      id: convertTitleToId(episode.title),
       title: episode.title,
-      thumbnail: episode.thumbnail,
-      members: episode.members,
-      publishedAt: '21 jan 20',
-      duration: Number(episode.file.duration),
-      convertedDuration: convertDurationToTimeString(
-        Number(episode.file.duration),
-      ),
-      url: episode.file.url,
+      thumbnail: episode.itunes_image?.href ?? '/cover.png',
+      members: episode.itunes_author,
+      description: episode.description,
+      publishedAt: dayjs(episode.published).locale('pt-br').format('DD MMM YY'),
+      duration: episode?.itunes_duration ?? '00:00:00',
+      convertedDuration: episode?.itunes_duration ?? '00:00:00',
+      url: episode.enclosures[0].url,
     };
   });
 
@@ -151,5 +191,6 @@ export const getStaticProps: GetStaticProps = async () => {
       latestEpisodes,
       allEpisodes,
     },
+    revalidate: 60 * 60 * 8, // 8 hours
   };
 };
