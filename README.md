@@ -10,6 +10,15 @@
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" height="64" width="64"/>
 </div>
 
+<br />
+<br />
+
+<div align="center">
+  <img src="https://i.imgur.com/svRSucV.png" alt="Preview">
+</div>
+
+<br />
+
 ## Description
 
 A platform for broadcasting <a href="https://www.youtube.com/channel/UCS8Mv2IWgrOIV5u52GzDuRQ" target="_blank">À Deriva Podcast</a> episodes. Inspired by RocketSeat NLW#05 project.
