@@ -6,6 +6,7 @@ import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 
 import { PlayerContext } from '@/contexts/PlayerContext';
+import { convertDurationToSeconds } from '@/utils/convertDurationToSeconds';
 import { convertDurationToTimeString } from '@/utils/convertDurationToTimeString';
 import styles from './styles.module.scss';
 
@@ -93,11 +94,11 @@ export default function Player() {
 
       <footer className={!episode ? styles.empty : ''}>
         <div className={styles.progress}>
-          <span>{convertDurationToTimeString(progress)}</span>
+          <span>{convertDurationToTimeString(progress)} </span>
           <div className={styles.slider}>
             {episode ? (
               <Slider
-                max={episode.duration}
+                max={convertDurationToSeconds(episode.duration)}
                 value={progress}
                 onChange={moveBar}
                 trackStyle={{ backgroundColor: '#04d361' }}
